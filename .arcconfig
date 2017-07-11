@@ -1,0 +1,5 @@
+{
+   "phabricator.uri" : "https://phabricator.testwiki.wiki/",
+   "repository.callsign" : "PHEX",
+   "history.immutable" : false
+}
