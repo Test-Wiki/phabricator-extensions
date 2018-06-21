@@ -16,7 +16,6 @@ final class WMFSecurityPolicy
     if ($viewer === null) {
       $viewer = PhabricatorUser::getOmnipotentUser();
     }
-
     $query = new PhabricatorProjectQuery();
     $project = $query->setViewer($viewer)
                      ->withNames(array($projectName))
@@ -24,7 +23,6 @@ final class WMFSecurityPolicy
                      ->executeOne();
     return $project;
   }
-
   /**
    * get the security project for a task (based on the security_topic field)
    * @return PhabricatorProject|null the project, or null if security_topic
@@ -32,13 +30,16 @@ final class WMFSecurityPolicy
    */
   public static function getSecurityProjectForTask($task) {
     switch (WMFSecurityPolicy::getSecurityFieldValue($task)) {
+      case 'sensitive':
+        return WMFSecurityPolicy::getProjectByName('WMF-NDA');
       case 'security-bug':
         return WMFSecurityPolicy::getProjectByName('security');
+      case 'ops-access-request':
+        return WMFSecurityPolicy::getProjectByName('Ops-Access-Requests');
       default:
         return false;
     }
   }
-
   /**
    * filter a list of transactions to remove any policy changes that would
    * make an object public.
@@ -51,7 +52,6 @@ final class WMFSecurityPolicy
       PhabricatorPolicies::POLICY_PUBLIC,
       PhabricatorPolicies::POLICY_USER,
     );
-
     foreach($transactions as $tkey => $t) {
       switch($t->getTransactionType()) {
         case PhabricatorTransactions::TYPE_EDIT_POLICY:
@@ -70,7 +70,6 @@ final class WMFSecurityPolicy
     }
     return array_values($transactions);
   }
-
   /**
    * Creates a custom policy for the given task having the following properties:
    *
@@ -89,18 +88,15 @@ final class WMFSecurityPolicy
     $include_subscribers=true,
     $old_policy=null,
     $save=true) {
-
     if (!is_array($user_phids)) {
       $user_phids = array($user_phids);
     }
     if (!is_array($project_phids)) {
       $project_phids = array($project_phids);
     }
-
     $policy = $old_policy instanceof PhabricatorPolicy
             ? $old_policy
             : new PhabricatorPolicy();
-
     $rules = array();
     if (!empty($user_phids)){
       $rules[] = array(
@@ -123,7 +119,6 @@ final class WMFSecurityPolicy
         'value'  => array($task->getPHID()),
       );
     }
-
     $policy
       ->setRules($rules)
       ->setDefaultAction(PhabricatorPolicy::ACTION_DENY);
@@ -131,7 +126,6 @@ final class WMFSecurityPolicy
       $policy->save();
     return $policy;
   }
-
   /**
    * return the value of the 'security_topic' custom field
    * on the given $task
@@ -140,19 +134,15 @@ final class WMFSecurityPolicy
    */
   public static function getSecurityFieldValue($task) {
     $viewer = PhabricatorUser::getOmnipotentUser();
-
     $field_list = PhabricatorCustomField::getObjectFields(
       $task,
       PhabricatorCustomField::ROLE_EDIT);
-
     $field_list
       ->setViewer($viewer)
       ->readFieldsFromStorage($task);
-
     $field_value = null;
     foreach ($field_list->getFields() as $field) {
       $field_key = $field->getFieldKey();
-
       if ($field_key == 'std:maniphest:security_topic') {
         $field_value = $field->getValueForStorage();
         break;
@@ -160,39 +150,13 @@ final class WMFSecurityPolicy
     }
     return $field_value;
   }
-
   public static function isTaskPublic($task) {
     $policy = $task->getViewPolicy();
-
     $public_policies = array(
        PhabricatorPolicies::POLICY_PUBLIC,
        PhabricatorPolicies::POLICY_USER);
-
     return in_array($policy, $public_policies);
   }
-
-
-  public static function userCanLockTask(PhabricatorUser $user, ManiphestTask $task) {
-    if (!$user->isLoggedIn()) {
-      return false;
-    }
-    $user_phid = $user->getPHID();
-    $author_phid = $task->getAuthorPHID();
-    if ($user_phid == $author_phid) {
-      return true;
-    }
-    $projects = array(
-      self::getProjectByName("Security"),
-    );
-    foreach ($projects as $proj) {
-      if ($proj instanceof PhabricatorProject &&
-          $proj->isUserMember($user_phid)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   public static function createPrivateSubtask($task) {
     $ops = self::getProjectByName('acl*operations-team');
     $ops_phids = array($ops->getPHID() => $ops->getPHID());
@@ -200,32 +164,23 @@ final class WMFSecurityPolicy
     $project_phids = array(
       $project->getPHID(),$ops->getPHID()
     );
-
     $task->save();
-
     $viewer = PhabricatorUser::getOmnipotentUser();
-
     $transactions = array();
-
     // Make this public task depend on a corresponding 'private task'
     $edge_type = ManiphestTaskDependsOnTaskEdgeType::EDGECONST;
-
     // First check for a pre-existant 'private task':
     $preexisting_tasks = PhabricatorEdgeQuery::loadDestinationPHIDs(
       $task->getPHID(),
       $edge_type);
-
     // if there isn't already a 'private task', create one:
     if (!count($preexisting_tasks)) {
       $user = id(new PhabricatorPeopleQuery())
         ->setViewer($viewer)
         ->withUsernames(array('admin'))
         ->executeOne();
-
       $policy = self::createCustomPolicy($task, array(), $ops_phids, false);
-
       $oid = $task->getID();
-
       $private_task = ManiphestTask::initializeNewTask($viewer);
       $private_task->setViewPolicy($policy->getPHID())
                  ->setEditPolicy($policy->getPHID())
@@ -233,7 +188,6 @@ final class WMFSecurityPolicy
                  ->setAuthorPHID($user->getPHID())
                  ->attachProjectPHIDs($project_phids)
                  ->save();
-
       $project_type = PhabricatorProjectObjectHasProjectEdgeType::EDGECONST;
       $transactions[] = id(new ManiphestTransaction())
         ->setTransactionType(PhabricatorTransactions::TYPE_EDGE)
@@ -242,28 +196,21 @@ final class WMFSecurityPolicy
         array(
           '=' => array_fuse($project_phids),
         ));
-
       // TODO: This should be transactional now.
       $edge_editor = id(new PhabricatorEdgeEditor());
-
       foreach($project_phids as $project_phid) {
         $edge_editor->addEdge(
           $private_task->getPHID(),
           $project_type,
           $project_phid);
       }
-
       $edge_editor
         ->addEdge(
           $task->getPHID(),
           $edge_type,
           $private_task->getPHID())
         ->save();
-
     }
-
     return $transactions;
   }
-
 }
-
