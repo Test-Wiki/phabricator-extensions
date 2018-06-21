@@ -14,6 +14,12 @@ phutil_register_library_map(array(
     'MediaWikiUserpageCustomField' => 'src/customfields/MediaWikiUserpageCustomField.php',
     'PhabricatorMediaWikiAuthProvider' => 'src/oauth/PhabricatorMediaWikiAuthProvider.php',
     'PhutilMediaWikiAuthAdapter' => 'src/oauth/PhutilMediaWikiAuthAdapter.php',
+    'SecurityPolicyEnforcerAction' => 'src/policy/SecurityPolicyEnforcerAction.php',
+    'WMFEscalateTaskController' => 'src/policy/WMFLockTaskController.php',
+    'WMFEscalateTaskEventListener' => 'src/policy/WMFLockTaskEventListener.php',
+    'WMFExtensionsApplication' => 'src/policy/TestWikiExtensionsApplication.php',
+    'WMFSecurityPolicy' => 'src/policy/WMFSecurityPolicy.php',
+    'WMFSubscribersPolicyRule' => 'src/policy/WMFSubscribersPolicyRule.php',
   ),
   'function' => array(),
   'xmap' => array(
@@ -22,5 +28,10 @@ phutil_register_library_map(array(
     'MediaWikiUserpageCustomField' => 'PhabricatorUserCustomField',
     'PhabricatorMediaWikiAuthProvider' => 'PhabricatorOAuth1AuthProvider',
     'PhutilMediaWikiAuthAdapter' => 'PhutilOAuth1AuthAdapter',
+    'SecurityPolicyEnforcerAction' => 'HeraldAction',
+    'WMFEscalateTaskController' => 'PhabricatorController',
+    'WMFEscalateTaskEventListener' => 'PhabricatorEventListener',
+    'WMFExtensionsApplication' => 'PhabricatorApplication',
+    'WMFSubscribersPolicyRule' => 'PhabricatorPolicyRule',
   ),
 ));
