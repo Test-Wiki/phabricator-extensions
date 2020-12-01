@@ -32,6 +32,10 @@ final class PhutilMediaWikiAuthAdapter
     return idx($this->getUserInfo(), 'userid');
   }
 
+  public function getConsumerKey() {
+    return parent::getConsumerKey;
+  }
+
   public function getAccountName() {
     return idx($this->getUserInfo(), 'username');
   }
@@ -98,7 +102,7 @@ final class PhutilMediaWikiAuthAdapter
 
   public function getClientRedirectURI() {
     $p = parent::getClientRedirectURI();
-    return $p."&oauth_consumer_key=[parent::getConsumerKey()]";
+    return $p."&oauth_consumer_key=[$this->getConsumerKey()]";
   }
 
   protected function getValidateTokenURI() {
@@ -145,7 +149,7 @@ final class PhutilMediaWikiAuthAdapter
       throw new Exception(
         pht('OAuth JWT iss didn\'t match expected server name'));
     }
-    if ($identity->aud !== parent::getConsumerKey()) {
+    if ($identity->aud !== $this->getConsumerKey()) {
       throw new Exception(
         pht('OAuth JWT aud didn\'t match expected consumer key'));
     }
