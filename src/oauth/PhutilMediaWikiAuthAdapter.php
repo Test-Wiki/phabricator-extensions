@@ -33,7 +33,7 @@ final class PhutilMediaWikiAuthAdapter
   }
 
   public function getConsumerKey() {
-    return parent::getConsumerKey;
+    return parent::getConsumerKey();
   }
 
   public function getAccountName() {
