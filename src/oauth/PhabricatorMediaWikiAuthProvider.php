@@ -1,6 +1,6 @@
 <?php
 
-final class PhabricatorGitHubAuthProvider
+final class PhabricatorMediaWikiAuthProvider
   extends PhabricatorOAuth2AuthProvider {
   
   const PROPERTY_PHABRICATOR_NAME = 'oauth2:phabricator:name';
