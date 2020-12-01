@@ -98,7 +98,7 @@ final class PhutilMediaWikiAuthAdapter
 
   public function getClientRedirectURI() {
     $p = parent::getClientRedirectURI();
-    return $p."&oauth_consumer_key=[$this->getConsumerKey()]";
+    return $p."&oauth_consumer_key=[parent::getConsumerKey()]";
   }
 
   protected function getValidateTokenURI() {
@@ -145,7 +145,7 @@ final class PhutilMediaWikiAuthAdapter
       throw new Exception(
         pht('OAuth JWT iss didn\'t match expected server name'));
     }
-    if ($identity->aud !== $this->getConsumerKey()) {
+    if ($identity->aud !== parent::getConsumerKey()) {
       throw new Exception(
         pht('OAuth JWT aud didn\'t match expected consumer key'));
     }
