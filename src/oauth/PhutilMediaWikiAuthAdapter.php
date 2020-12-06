@@ -32,10 +32,6 @@ final class PhutilMediaWikiAuthAdapter
     return idx($this->getUserInfo(), 'userid');
   }
 
-  public function getConsumerKey() {
-    return parent::getConsumerKey();
-  }
-
   public function getAccountName() {
     return idx($this->getUserInfo(), 'username');
   }
