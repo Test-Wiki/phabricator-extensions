@@ -10,6 +10,15 @@ final class PhutilMediaWikiAuthAdapter
   private $domain = '';
   private $mediaWikiBaseURI = '';
   private $callback_uri = '';
+    
+  public function setMediaWikiBaseURI($uri) {
+    $this->mediaWikiBaseURI = $uri;
+    return $this;
+  }
+    
+  public function c() {
+    return $this->mediaWikiBaseURI;
+  }
 
   public function getWikiPageURI($title, $query_params = null) {
     $uri = $this->mediaWikiBaseURI;
@@ -89,7 +98,7 @@ final class PhutilMediaWikiAuthAdapter
   }
 
   protected function getAuthenticateBaseURI() {
-    return $this->mediaWikiBaseURI('rest.php/oauth2/authorize');
+    return $this->getMediaWikiBaseURI('rest.php/oauth2/authorize');
   }
 
   public function setAdapterDomain($domain) {
@@ -97,18 +106,13 @@ final class PhutilMediaWikiAuthAdapter
     return $this;
   }
 
-  public function setMediaWikiBaseURI($uri) {
-    $this->mediaWikiBaseURI = $uri;
-    return $this;
-  }
-
   protected function getTokenBaseURI() {
-    return $this->mediaWikiBaseURI('rest.php/oauth2/access_token');
+    return $this->getMediaWikiBaseURI('rest.php/oauth2/access_token');
   }
 
   protected function loadOAuthAccountData() {
     if ($this->userinfo === null) {
-      $uri = id(new PhutilURI($this->mediaWikiBaseURI('rest.php/oauth2/resource/profile')))
+      $uri = id(new PhutilURI($this->getMediaWikiBaseURI('rest.php/oauth2/resource/profile')))
         ->replaceQueryParam('access_token', $this->getAccessToken());
       list($body) = id(new HTTPSFuture($uri))->resolvex();
       try {
