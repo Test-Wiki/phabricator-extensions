@@ -97,7 +97,7 @@ final class PhabricatorMediaWikiAuthProvider
 
     return id(new PhutilMediaWikiAuthAdapter())
       ->setAdapterDomain($config->getProviderDomain())
-      ->setPhabricatorBaseURI(
+      ->setMediaWikiBaseURI(
         $config->getProperty(self::PROPERTY_MEDIAWIKI_URI));
   }
 
