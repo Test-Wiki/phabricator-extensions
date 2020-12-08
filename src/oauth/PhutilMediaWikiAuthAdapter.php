@@ -29,11 +29,11 @@ final class PhutilMediaWikiAuthAdapter
 
   public function getAccountID() {
     $this->getHandshakeData();
-    return idx($this->getUserInfo(), 'userid');
+    return idx($this->loadOAuthAccountData(), 'userid');
   }
 
   public function getAccountName() {
-    return idx($this->getUserInfo(), 'username');
+    return idx($this->loadOAuthAccountData(), 'username');
   }
 
   public function getAccountURI() {
@@ -45,12 +45,12 @@ final class PhutilMediaWikiAuthAdapter
   }
 
   public function getAccountImageURI() {
-    $info = $this->getUserInfo();
+    $info = $this->loadOAuthAccountData();
     return idx($info, 'profile_image_url');
   }
 
   public function getAccountRealName() {
-    $info = $this->getUserInfo();
+    $info = $this->loadOAuthAccountData();
     return idx($info, 'name');
   }
 
@@ -106,7 +106,7 @@ final class PhutilMediaWikiAuthAdapter
     return $this->mediaWikiBaseURI('rest.php/oauth2/access_token');
   }
 
-  private function getUserInfo() {
+  private function loadOAuthAccountData() {
     if ($this->userinfo === null) {
       $uri = id(new PhutilURI($this->mediaWikiBaseURI('rest.php/oauth2/resource/profile')))
         ->replaceQueryParam('access_token', $this->getAccessToken());
