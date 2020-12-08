@@ -1,7 +1,7 @@
 <?php
 
 final class PhabricatorMediaWikiAuthProvider
-  extends PhabricatorOAuthAuthProvider {
+  extends PhabricatorOAuth2AuthProvider {
 
   const PROPERTY_MEDIAWIKI_NAME = 'oauth2:mediawiki:name';
   const PROPERTY_MEDIAWIKI_URI = 'oauth2:mediawiki:uri';
