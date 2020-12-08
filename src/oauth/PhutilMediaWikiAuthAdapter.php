@@ -16,7 +16,7 @@ final class PhutilMediaWikiAuthAdapter
     return $this;
   }
     
-  public function c() {
+  public function getMediaWikiBaseURI() {
     return $this->mediaWikiBaseURI;
   }
 
