@@ -106,7 +106,7 @@ final class PhutilMediaWikiAuthAdapter
     return $this->mediaWikiBaseURI('rest.php/oauth2/access_token');
   }
 
-  private function loadOAuthAccountData() {
+  protected function loadOAuthAccountData() {
     if ($this->userinfo === null) {
       $uri = id(new PhutilURI($this->mediaWikiBaseURI('rest.php/oauth2/resource/profile')))
         ->replaceQueryParam('access_token', $this->getAccessToken());
