@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Authentication adapter for MediaWiki OAuth1.
+ * Authentication adapter for MediaWiki OAuth2.
  */
 final class PhutilMediaWikiAuthAdapter
-    extends PhutilOAuth1AuthAdapter {
+    extends PhutilOAuth2AuthAdapter {
 
   private $userinfo;
   private $domain = '';
@@ -61,6 +61,18 @@ final class PhutilMediaWikiAuthAdapter
   public function getAdapterDomain() {
     return $this->domain;
   }
+    
+  public function getExtraAuthenticateParameters() {
+    return array(
+      'response_type' => 'code',
+    );
+  }
+
+  public function getExtraTokenParameters() {
+    return array(
+      'grant_type' => 'authorization_code',
+    );
+  }
 
   /* mediawiki oauth needs the callback uri to be "oob"
    (out of band callback) */
@@ -76,14 +88,8 @@ final class PhutilMediaWikiAuthAdapter
     return false;
   }
 
-  protected function getRequestTokenURI() {
-    $callback = $this->getCallbackURI();
-    return $this->getWikiPageURI('Special:OAuth/initiate',
-                  array('oauth_callback' => $callback));
-  }
-
   protected function getAuthorizeTokenURI() {
-    return $this->getWikiPageURI('Special:OAuth/authorize');
+    return $this->mediaWikiBaseURI('rest.php/oauth2/authorize');
   }
 
   public function setAdapterDomain($domain) {
@@ -96,27 +102,15 @@ final class PhutilMediaWikiAuthAdapter
     return $this;
   }
 
-  public function getClientRedirectURI() {
-    $p = parent::getClientRedirectURI();
-    return $p."&oauth_consumer_key=[$this->getConsumerKey()]";
-  }
-
-  protected function getValidateTokenURI() {
-    return $this->getWikiPageURI('Special:OAuth/token');
+  protected function getTokenBaseURI() {
+    return $this->mediaWikiBaseURI('rest.php/oauth2/access_token');
   }
 
   private function getUserInfo() {
     if ($this->userinfo === null) {
-      $uri = new PhutilURI(
-        $this->getWikiPageURI('Special:OAuth/identify',
-                        array('format' => 'json')));
-
-      // We gen this so we can check for replay below:
-      $nonce = Filesystem::readRandomCharacters(32);
-      list($body) = $this->newOAuth1Future($uri)
-        ->setMethod('GET')
-        ->setNonce($nonce)
-        ->resolvex();
+      $uri = id(new PhutilURI($this->mediaWikiBaseURI('rest.php/oauth2/resource/profile')))
+        ->replaceQueryParam('access_token', $this->getAccessToken());
+      list($body) = id(new HTTPSFuture($uri))->resolvex();
       $this->userinfo = $this->decodeAndVerifyJWT($body, $nonce);
     }
     return $this->userinfo;
