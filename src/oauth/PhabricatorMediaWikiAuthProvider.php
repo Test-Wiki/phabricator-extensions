@@ -87,9 +87,9 @@ final class PhabricatorMediaWikiAuthProvider
         "NOTE: Before Phabricator can successfully authenticate to your MediaWiki,".
         " a wiki admin must approve the oauth consumer registration using the form".
         " which can be found at the following url: %s",
-        $wiki_uri.'/index.php?title=Special:OAuthConsumerRegistration/propose',
-        $login_uri,
-        $wiki_uri.'/index.php?title=Special:OAuthManageConsumers/proposed');
+        $this->getWikiURI().'/index.php?title=Special:OAuthConsumerRegistration/propose',
+        PhabricatorEnv::getURI($this->getLoginURI()),
+        $this->getWikiURI().'/index.php?title=Special:OAuthManageConsumers/proposed');
   }
 
   protected function newOAuthAdapter() {
