@@ -98,7 +98,7 @@ final class PhutilMediaWikiAuthAdapter
   }
 
   protected function getAuthenticateBaseURI() {
-    return $this->getMediaWikiBaseURI('rest.php/oauth2/authorize');
+    return $this->getMediaWikiBaseURI('rest.php/oauth2/authorize/');
   }
 
   public function setAdapterDomain($domain) {
@@ -107,7 +107,7 @@ final class PhutilMediaWikiAuthAdapter
   }
 
   protected function getTokenBaseURI() {
-    return $this->getMediaWikiBaseURI('rest.php/oauth2/access_token');
+    return $this->getMediaWikiBaseURI('rest.php/oauth2/access_token/');
   }
 
   protected function loadOAuthAccountData() {
