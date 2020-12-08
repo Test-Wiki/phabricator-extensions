@@ -88,7 +88,7 @@ final class PhutilMediaWikiAuthAdapter
     return false;
   }
 
-  protected function getAuthorizeTokenURI() {
+  protected function getAuthenticateBaseURI() {
     return $this->mediaWikiBaseURI('rest.php/oauth2/authorize');
   }
 
