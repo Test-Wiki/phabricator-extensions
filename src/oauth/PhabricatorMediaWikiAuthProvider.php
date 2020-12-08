@@ -201,7 +201,7 @@ final class PhabricatorMediaWikiAuthProvider
         id(new AphrontFormTextControl())
           ->setLabel(pht('MediaWiki Base URI'))
           ->setValue($v_uri)
-          ->setName(self::PROPERTY_PHABRICATOR_URI)
+          ->setName(self::PROPERTY_MEDIAWIKI_URI)
           ->setCaption(
             pht('URL to your MediaWiki install upto but not including index.php',))
           ->setError($e_uri));
