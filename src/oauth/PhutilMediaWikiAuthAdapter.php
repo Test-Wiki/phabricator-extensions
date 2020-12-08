@@ -35,7 +35,7 @@ final class PhutilMediaWikiAuthAdapter
   }
 
   public function getAdapterDomain() {
-    return $this->domain;
+    return $this->adapterDomain;
   }
     
   public function setAdapterDomain($domain) {
