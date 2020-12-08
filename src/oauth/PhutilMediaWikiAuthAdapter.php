@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Authentication adapter for MediaWiki OAuth1.
+ * Authentication adapter for MediaWiki OAuth2.
  */
 final class PhutilMediaWikiAuthAdapter
-    extends PhutilOAuth1AuthAdapter {
+    extends PhutilOAuthAuthAdapter {
 
   private $userinfo;
   private $domain = '';
@@ -61,6 +61,18 @@ final class PhutilMediaWikiAuthAdapter
   public function getAdapterDomain() {
     return $this->domain;
   }
+    
+  public function getExtraAuthenticateParameters() {
+    return array(
+      'response_type' => 'code',
+    );
+  }
+
+  public function getExtraTokenParameters() {
+    return array(
+      'grant_type' => 'authorization_code',
+    );
+  }
 
   /* mediawiki oauth needs the callback uri to be "oob"
    (out of band callback) */
@@ -76,14 +88,8 @@ final class PhutilMediaWikiAuthAdapter
     return false;
   }
 
-  protected function getRequestTokenURI() {
-    $callback = $this->getCallbackURI();
-    return $this->getWikiPageURI('Special:OAuth/initiate',
-                  array('oauth_callback' => $callback));
-  }
-
   protected function getAuthorizeTokenURI() {
-    return $this->getWikiPageURI('Special:OAuth/authorize');
+    return $this->mediaWikiBaseURI('rest.php/oauth2/authorize');
   }
 
   public function setAdapterDomain($domain) {
@@ -96,28 +102,24 @@ final class PhutilMediaWikiAuthAdapter
     return $this;
   }
 
-  public function getClientRedirectURI() {
-    $p = parent::getClientRedirectURI();
-    return $p."&oauth_consumer_key=[$this->getConsumerKey()]";
-  }
-
-  protected function getValidateTokenURI() {
-    return $this->getWikiPageURI('Special:OAuth/token');
+  protected function getTokenBaseURI() {
+    return $this->mediaWikiBaseURI('rest.php/oauth2/access_token');
   }
 
   private function getUserInfo() {
     if ($this->userinfo === null) {
-      $uri = new PhutilURI(
-        $this->getWikiPageURI('Special:OAuth/identify',
-                        array('format' => 'json')));
-
-      // We gen this so we can check for replay below:
-      $nonce = Filesystem::readRandomCharacters(32);
-      list($body) = $this->newOAuth1Future($uri)
-        ->setMethod('GET')
-        ->setNonce($nonce)
-        ->resolvex();
-      $this->userinfo = $this->decodeAndVerifyJWT($body, $nonce);
+      $uri = id(new PhutilURI($this->mediaWikiBaseURI('rest.php/oauth2/resource/profile')))
+        ->replaceQueryParam('access_token', $this->getAccessToken());
+      list($body) = id(new HTTPSFuture($uri))->resolvex();
+      try {
+        $data = phutil_json_decode($body);
+        return $data['result'];
+      } catch (PhutilJSONParserException $ex) {
+        throw new Exception(
+          pht(
+            'Expected valid JSON response from MediaWiki request'),
+          $ex);
+    }
     }
     return $this->userinfo;
   }
@@ -127,85 +129,5 @@ final class PhutilMediaWikiAuthAdapter
       throw new Exception(
         pht('OAuth provider returned an error response.'));
     }
-  }
-
-  /**
-   * MediaWiki uses a signed JWT to assert the user's identity
-   * here we verify the identity, not just the jwt signature.
-   */
-  private function decodeAndVerifyJWT($jwt, $nonce) {
-    $userinfo = array();
-    $identity = $this->decodeJWT($jwt);
-    $iss_uri = new PhutilURI($identity->iss);
-    $expected_uri = new PhutilURI($this->mediaWikiBaseURI);
-
-    $now = time();
-
-    if ($iss_uri->getDomain() !== $expected_uri->getDomain()) {
-      throw new Exception(
-        pht('OAuth JWT iss didn\'t match expected server name'));
-    }
-    if ($identity->aud !== $this->getConsumerKey()) {
-      throw new Exception(
-        pht('OAuth JWT aud didn\'t match expected consumer key'));
-    }
-    if ($identity->iat > $now || $identity->exp < $now) {
-      throw new Exception(
-        pht('OAuth JWT wasn\'t valid at this time'));
-    }
-    if ($identity->nonce !== $nonce) {
-      throw new Exception(
-        pht('OAuth JWT nonce didn\'t match what we sent.'));
-    }
-    $userinfo['userid'] = $identity->sub;
-    $userinfo['username'] = $identity->username;
-    $userinfo['groups'] = $identity->groups;
-    $userinfo['blocked'] = $identity->blocked;
-    $userinfo['editcount'] = $identity->editcount;
-    return $userinfo;
-  }
-
-  /** decode a JWT and verify the signature is valid */
-  private function decodeJWT($jwt) {
-    list($headb64, $bodyb64, $sigb64) = explode('.', $jwt);
-
-    $header = json_decode($this->urlsafeB64Decode($headb64));
-    $body = json_decode($this->urlsafeB64Decode($bodyb64));
-    $sig = $this->urlsafeB64Decode($sigb64);
-
-    $expect_sig = hash_hmac(
-        'sha256',
-        "$headb64.$bodyb64",
-        $this->getConsumerSecret()->openEnvelope(),
-        true);
-
-    // MediaWiki will only use sha256 hmac (HS256) for now.
-    // This checks that an attacker doesn't return invalid JWT signature type.
-    if ($header->alg !== 'HS256' ||
-        !$this->compareHash($sig, $expect_sig)) {
-      throw new Exception('Invalid JWT signature from /identify.');
-    }
-
-    return $body;
-  }
-
-  private function urlsafeB64Decode($input) {
-    $remainder = strlen($input) % 4;
-    if ($remainder) {
-      $padlen = 4 - $remainder;
-      $input .= str_repeat('=', $padlen);
-    }
-    return base64_decode(strtr($input, '-_', '+/'));
-  }
-
-  /** return true if hash1 has the same value as hash2 */
-  private function compareHash($hash1, $hash2) {
-    $result = strlen($hash1) ^ strlen($hash2);
-    $len = min(strlen($hash1), strlen($hash2));
-    for ($i = 0; $i < $len; $i++) {
-        $result |= ord($hash1[$i]) ^ ord($hash2[$i]);
-    }
-    // this is just a constant time compare of the two hash strings
-    return $result == 0;
   }
 }
