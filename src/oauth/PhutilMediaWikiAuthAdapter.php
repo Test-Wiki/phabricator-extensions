@@ -36,13 +36,26 @@ final class PhutilMediaWikiAuthAdapter
           '&'));
   }
 
+  public function getAdapterDomain() {
+    return $this->domain;
+  }
+    
+  public function setAdapterDomain($domain) {
+    $this->adapterDomain = $domain;
+    return $this;
+  }
+    
+  public function getAdapterType() {
+    return 'mediawiki';
+  }
+
   public function getAccountID() {
     $this->getHandshakeData();
     return idx($this->loadOAuthAccountData(), 'userid');
   }
-
-  public function getAccountName() {
-    return idx($this->loadOAuthAccountData(), 'username');
+    
+  public function getAccountEmail() {
+    return idx($this->loadOAuthAccountData(), 'confirmed_email');
   }
 
   public function getAccountURI() {
@@ -52,23 +65,26 @@ final class PhutilMediaWikiAuthAdapter
     }
     return null;
   }
-
-  public function getAccountImageURI() {
-    $info = $this->loadOAuthAccountData();
-    return idx($info, 'profile_image_url');
+    
+  public function getAccountName() {
+    return idx($this->loadOAuthAccountData(), 'username');
   }
 
   public function getAccountRealName() {
     $info = $this->loadOAuthAccountData();
-    return idx($info, 'name');
+    return idx($info, 'realname');
   }
-
-  public function getAdapterType() {
-    return 'mediawiki';
+    
+  protected function getAuthenticateBaseURI() {
+    return $this->getMediaWikiURI('rest.php/oauth2/authorize/');
   }
-
-  public function getAdapterDomain() {
-    return $this->domain;
+    
+  protected function getTokenBaseURI() {
+    return $this->getMediaWikiURI('rest.php/oauth2/access_token/');
+  }
+    
+  public function getScope() {
+    return '';
   }
     
   public function getExtraAuthenticateParameters() {
@@ -83,36 +99,9 @@ final class PhutilMediaWikiAuthAdapter
     );
   }
 
-  /* mediawiki oauth needs the callback uri to be "oob"
-   (out of band callback) */
-  public function getCallbackURI() {
-    return $this->callback_uri;
-  }
-
-  public function setCallbackURI($uri) {
-    $this->callback_uri = $uri;
-  }
-
-  public function shouldAddCSRFTokenToCallbackURI() {
-    return false;
-  }
-
-  protected function getAuthenticateBaseURI() {
-    return $this->getMediaWikiBaseURI('rest.php/oauth2/authorize/');
-  }
-
-  public function setAdapterDomain($domain) {
-    $this->domain = $domain;
-    return $this;
-  }
-
-  protected function getTokenBaseURI() {
-    return $this->getMediaWikiBaseURI('rest.php/oauth2/access_token/');
-  }
-
   protected function loadOAuthAccountData() {
     if ($this->userinfo === null) {
-      $uri = id(new PhutilURI($this->getMediaWikiBaseURI('rest.php/oauth2/resource/profile')))
+      $uri = id(new PhutilURI($this->getMediaWikiURI('rest.php/oauth2/resource/profile')))
         ->replaceQueryParam('access_token', $this->getAccessToken());
       list($body) = id(new HTTPSFuture($uri))->resolvex();
       try {
@@ -133,5 +122,9 @@ final class PhutilMediaWikiAuthAdapter
       throw new Exception(
         pht('OAuth provider returned an error response.'));
     }
+  }
+    
+   private function getMediaWikiURI($path) {
+    return rtrim($this->mediaWikiBaseURI, '/').'/'.ltrim($path, '/');
   }
 }
