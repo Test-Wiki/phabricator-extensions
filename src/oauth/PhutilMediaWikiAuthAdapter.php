@@ -74,11 +74,11 @@ final class PhutilMediaWikiAuthAdapter
   }
     
   protected function getAuthenticateBaseURI() {
-    return $this->getMediaWikiURI('rest.php/oauth2/authorize/');
+    return $this->getMediaWikiURI('rest.php/oauth2/authorize');
   }
     
   protected function getTokenBaseURI() {
-    return $this->getMediaWikiURI('rest.php/oauth2/access_token/');
+    return $this->getMediaWikiURI('rest.php/oauth2/access_token');
   }
     
   public function getScope() {
