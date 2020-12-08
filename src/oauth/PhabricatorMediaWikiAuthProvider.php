@@ -187,7 +187,7 @@ final class PhabricatorMediaWikiAuthProvider
             ->setName(self::PROPERTY_MEDIAWIKI_NAME)
             ->setError($e_name)
             ->setCaption(pht(
-            'Use lowercase letters, digits, and periods. For example: %s',)));
+            'Use lowercase letters, digits, and periods.',)));
     } else {
       $form
         ->appendChild(
