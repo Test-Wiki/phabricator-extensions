@@ -5,11 +5,9 @@
  */
 final class PhutilMediaWikiAuthAdapter
     extends PhutilOAuthAuthAdapter {
-
-  private $userinfo;
-  private $domain = '';
+    
   private $mediaWikiBaseURI = '';
-  private $callback_uri = '';
+  private $adapterDomain;
     
   public function setMediaWikiBaseURI($uri) {
     $this->mediaWikiBaseURI = $uri;
