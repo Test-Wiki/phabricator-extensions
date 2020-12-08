@@ -58,7 +58,7 @@ final class PhabricatorMediaWikiAuthProvider
     if ($this->isCreate()) {
       return pht(
         "**Step 1 of 2**: Provide the name and URI for your MediaWiki install.\n\n".
-        "In the next step, you will create an auth consumer in MediaWiki to be used by Phabricator oauth.")
+        "In the next step, you will create an auth consumer in MediaWiki to be used by Phabricator oauth.");
     }
 
     return parent::getConfigurationHelp();
