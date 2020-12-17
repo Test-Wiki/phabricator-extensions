@@ -81,6 +81,10 @@ final class PhutilMediaWikiAuthAdapter
     return $this->getMediaWikiURI('rest.php/oauth2/access_token');
   }
     
+  public function getScope() {
+     return '';
+   }
+    
   public function getExtraAuthenticateParameters() {
     return array(
       'response_type' => 'code',
