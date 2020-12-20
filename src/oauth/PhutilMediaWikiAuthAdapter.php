@@ -49,7 +49,7 @@ final class PhutilMediaWikiAuthAdapter
 
   public function getAccountID() {
    // $this->getHandshakeData();
-    return idx($this->loadOAuthAccountData(), 'userid');
+    return idx($this->loadOAuthAccountData(), 'sub');
   }
     
   public function getAccountEmail() {
