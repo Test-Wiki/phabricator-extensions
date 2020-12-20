@@ -106,7 +106,7 @@ final class PhutilMediaWikiAuthAdapter
     try {
       $data = phutil_json_decode($body);
       error_log(print_r($data,true));
-      return $data['result']
+      return $data['result'];
     } catch (PhutilJSONParserException $ex) {
       throw new Exception(
         pht(
