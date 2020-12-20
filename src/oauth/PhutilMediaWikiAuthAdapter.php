@@ -100,7 +100,7 @@ final class PhutilMediaWikiAuthAdapter
   protected function loadOAuthAccountData() {
     $uri = id(new PhutilURI($this->getMediaWikiURI('rest.php/oauth2/resource/profile')));
     $future = new HTTPSFuture($uri);
-    $token_header = sprintf('token %s', $this->getAccessToken());
+    $token_header = sprintf('Bearer %s', $this->getAccessToken());
     $future->addHeader('Authorization', $token_header);
     list($body) = $future->resolvex();
     try {
