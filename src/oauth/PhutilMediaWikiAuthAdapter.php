@@ -53,7 +53,7 @@ final class PhutilMediaWikiAuthAdapter
   }
     
   public function getAccountEmail() {
-    return idx($this->loadOAuthAccountData(), 'confirmed_email');
+    return idx($this->loadOAuthAccountData(), 'email');
   }
 
   public function getAccountURI() {
@@ -99,8 +99,10 @@ final class PhutilMediaWikiAuthAdapter
 
   protected function loadOAuthAccountData() {
     $uri = id(new PhutilURI($this->getMediaWikiURI('rest.php/oauth2/resource/profile')))
-      ->replaceQueryParam('access_token', $this->getAccessToken());
-    list($body) = id(new HTTPSFuture($uri))->resolvex();
+    $future = new HTTPSFuture($uri);
+    $token_header = sprintf('token %s', $this->getAccessToken());
+    $future->addHeader('Authorization', $token_header);
+    list($body) = $future->resolvex();
     try {
       $data = phutil_json_decode($body);
       return $data['result'];
