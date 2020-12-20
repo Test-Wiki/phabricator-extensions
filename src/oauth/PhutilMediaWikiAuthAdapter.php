@@ -103,15 +103,8 @@ final class PhutilMediaWikiAuthAdapter
     $token_header = sprintf('Bearer %s', $this->getAccessToken());
     $future->addHeader('Authorization', $token_header);
     list($body) = $future->resolvex();
-    try {
-      $data = $this->decodeJWT($body);
-      return $data['result'];
-    } catch (Exception $ex) {
-      throw new Exception(
-        pht(
-          'Expected valid JSON response from MediaWiki request'),
-        $ex);
-     }
+    $data = $this->decodeJWT($body);
+    return $data['result'];
   }
 
 private function decodeJWT($jwt) {
