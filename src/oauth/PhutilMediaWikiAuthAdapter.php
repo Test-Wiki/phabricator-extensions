@@ -109,6 +109,7 @@ final class PhutilMediaWikiAuthAdapter
         pht(
           'Expected valid JSON response from MediaWiki request'),
         $ex);
+     }
   }
 
   protected function willProcessTokenRequestResponse($body) {
