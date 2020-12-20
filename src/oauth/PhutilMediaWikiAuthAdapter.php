@@ -98,21 +98,17 @@ final class PhutilMediaWikiAuthAdapter
   }
 
   protected function loadOAuthAccountData() {
-    if ($this->userinfo === null) {
-      $uri = id(new PhutilURI($this->getMediaWikiURI('rest.php/oauth2/resource/profile')))
-        ->replaceQueryParam('access_token', $this->getAccessToken());
-      list($body) = id(new HTTPSFuture($uri))->resolvex();
-      try {
-        $data = phutil_json_decode($body);
-        return $data['result'];
-      } catch (PhutilJSONParserException $ex) {
-        throw new Exception(
-          pht(
-            'Expected valid JSON response from MediaWiki request'),
-          $ex);
-    }
-    }
-    return $this->userinfo;
+    $uri = id(new PhutilURI($this->getMediaWikiURI('rest.php/oauth2/resource/profile')))
+      ->replaceQueryParam('access_token', $this->getAccessToken());
+    list($body) = id(new HTTPSFuture($uri))->resolvex();
+    try {
+      $data = phutil_json_decode($body);
+      return $data['result'];
+    } catch (PhutilJSONParserException $ex) {
+      throw new Exception(
+        pht(
+          'Expected valid JSON response from MediaWiki request'),
+        $ex);
   }
 
   protected function willProcessTokenRequestResponse($body) {
