@@ -103,31 +103,15 @@ final class PhutilMediaWikiAuthAdapter
     $token_header = sprintf('Bearer %s', $this->getAccessToken());
     $future->addHeader('Authorization', $token_header);
     list($body) = $future->resolvex();
-    $data = $this->decodeJWT($body);
-    return $data['result'];
-  }
-
-private function decodeJWT($jwt) {
-    list($headb64, $bodyb64, $sigb64) = explode('.', $jwt);
-
-    $header = json_decode($this->urlsafeB64Decode($headb64));
-    $body = json_decode($this->urlsafeB64Decode($bodyb64));
-    $sig = $this->urlsafeB64Decode($sigb64);
-
-    $expect_sig = hash_hmac(
-        'sha256',
-        "$headb64.$bodyb64",
-        $this->getConsumerSecret()->openEnvelope(),
-        true);
-
-    // MediaWiki will only use sha256 hmac (HS256) for now.
-    // This checks that an attacker doesn't return invalid JWT signature type.
-    if ($header->alg !== 'HS256' ||
-        !$this->compareHash($sig, $expect_sig)) {
-      throw new Exception('Invalid JWT signature.');
-    }
-
-    return $body;
+    try {
+      $data = phutil_json_decode($body);
+      return $data['result'];
+    } catch (PhutilJSONParserException $ex) {
+      throw new Exception(
+        pht(
+          'Expected valid JSON response from MediaWiki request'),
+        $ex);
+     }
   }
 
   protected function willProcessTokenRequestResponse($body) {
