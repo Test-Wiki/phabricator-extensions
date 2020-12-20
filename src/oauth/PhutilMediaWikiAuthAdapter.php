@@ -48,7 +48,7 @@ final class PhutilMediaWikiAuthAdapter
   }
 
   public function getAccountID() {
-    $this->getHandshakeData();
+   // $this->getHandshakeData();
     return idx($this->loadOAuthAccountData(), 'userid');
   }
     
