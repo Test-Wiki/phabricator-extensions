@@ -9,7 +9,6 @@
 phutil_register_library_map(array(
   '__library_version__' => 2,
   'class' => array(
-    'CustomLoginHandler' => 'src/other/CustomLoginHandler.php',
     'GitHubAccountCustomField' => 'src/customfields/GitHubAccountCustomField.php',
     'MediaWikiUserpageCustomField' => 'src/customfields/MediaWikiUserpageCustomField.php',
     'PhabricatorMediaWikiAuthProvider' => 'src/oauth/PhabricatorMediaWikiAuthProvider.php',
@@ -23,11 +22,10 @@ phutil_register_library_map(array(
   ),
   'function' => array(),
   'xmap' => array(
-    'CustomLoginHandler' => 'PhabricatorAuthLoginHandler',
     'GitHubAccountCustomField' => 'PhabricatorUserCustomField',
     'MediaWikiUserpageCustomField' => 'PhabricatorUserCustomField',
-    'PhabricatorMediaWikiAuthProvider' => 'PhabricatorOAuth1AuthProvider',
-    'PhutilMediaWikiAuthAdapter' => 'PhutilOAuth1AuthAdapter',
+    'PhabricatorMediaWikiAuthProvider' => 'PhabricatorOAuth2AuthProvider',
+    'PhutilMediaWikiAuthAdapter' => 'PhutilOAuthAuthAdapter',
     'SecurityPolicyEnforcerAction' => 'HeraldAction',
     'WMFEscalateTaskController' => 'PhabricatorController',
     'WMFEscalateTaskEventListener' => 'PhabricatorEventListener',

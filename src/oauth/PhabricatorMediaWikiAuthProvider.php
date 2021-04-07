@@ -187,7 +187,7 @@ final class PhabricatorMediaWikiAuthProvider
             ->setName(self::PROPERTY_MEDIAWIKI_NAME)
             ->setError($e_name)
             ->setCaption(pht(
-            'Use lowercase letters, digits, and periods.',)));
+            'Use lowercase letters, digits, and periods.')));
     } else {
       $form
         ->appendChild(
@@ -203,7 +203,7 @@ final class PhabricatorMediaWikiAuthProvider
           ->setValue($v_uri)
           ->setName(self::PROPERTY_MEDIAWIKI_URI)
           ->setCaption(
-            pht('URL to your MediaWiki install upto but not including index.php',))
+            pht('URL to your MediaWiki install upto but not including index.php'))
           ->setError($e_uri));
 
     if (!$is_setup) {
